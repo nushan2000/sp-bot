@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SP Bot</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2129;--mut:#6b7280;--line:#e5e7eb;--pri:#2563eb;--ok:#16a34a;--bad:#dc2626;--warn:#d97706}
+@media(prefers-color-scheme:dark){:root{--bg:#111318;--card:#1b1e26;--ink:#e6e8ee;--mut:#9aa1b0;--line:#2b303b;--pri:#60a5fa;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,sans-serif}
+header{background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;position:sticky;top:0;z-index:5}
+header h1{font-size:16px;margin:0 12px 0 0}nav{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+nav button{background:none;border:0;color:var(--mut);padding:6px 12px;border-radius:6px;cursor:pointer;font:inherit}
+nav button.on{background:var(--pri);color:#fff}
+main{max-width:1200px;margin:0 auto;padding:16px}
+.banner{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-weight:600;border:1px solid}
+.banner.ok{background:color-mix(in srgb,var(--ok) 12%,var(--card));border-color:var(--ok)}
+.banner.bad{background:color-mix(in srgb,var(--bad) 12%,var(--card));border-color:var(--bad)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:12px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.card .l{color:var(--mut);font-size:12px}.card .v{font-size:22px;font-weight:700}.card .d{font-size:12px;color:var(--mut)}
+.up{color:var(--ok)}.down{color:var(--bad)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:16px;margin-bottom:16px}
+h2{font-size:14px;margin:0 0 8px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--mut);font-weight:600;font-size:12px;cursor:default}td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.click{cursor:pointer}tr.click:hover{background:color-mix(in srgb,var(--pri) 8%,transparent)}
+.scroll{overflow-x:auto}
+img.th{width:64px;height:40px;object-fit:cover;border-radius:4px;background:var(--line);display:block}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}
+input,select,textarea{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit}
+button.b{background:var(--pri);color:#fff;border:0;border-radius:6px;padding:7px 14px;cursor:pointer;font:inherit}
+button.b.g{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.tag{display:inline-block;background:var(--line);border-radius:10px;padding:1px 8px;margin:1px;font-size:12px;cursor:pointer}
+svg text{fill:var(--mut);font-size:10px}
+.modal{position:fixed;inset:0;background:#0007;display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 12px;z-index:9}
+.modal.on{display:flex}.modal .card{max-width:820px;width:100%}
+form.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:12px}
+form.set label{display:flex;flex-direction:column;gap:3px;color:var(--mut);font-size:12px}form.set input,form.set select,form.set textarea{width:100%}
+form.set h3{grid-column:1/-1;margin:12px 0 0;font-size:14px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.pill{padding:1px 8px;border-radius:10px;font-size:12px;color:#fff}.pill.ok{background:var(--ok)}.pill.bad{background:var(--bad)}
+.mut{color:var(--mut)}
+.av{display:inline-block;min-width:22px;text-align:center;border-radius:6px;font-weight:700;padding:0 5px;margin-right:6px}
+tr.me{background:color-mix(in srgb,var(--pri) 10%,transparent)}th.s{cursor:pointer;user-select:none}th.s:hover{color:var(--ink)}
+.chg{font-size:11px;margin-left:4px}.hm{display:grid;grid-template-columns:repeat(24,1fr);gap:2px}.hm div{height:26px;border-radius:3px;font-size:9px;color:var(--mut);text-align:center;line-height:26px}
+
+html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
+.card{min-width:0}svg{max-width:100%;height:auto}
+td{word-break:break-word}.scroll table{min-width:520px}.scroll{-webkit-overflow-scrolling:touch}
+input,select,textarea,button{font-size:16px}
+@media(max-width:700px){
+  header{padding:8px 10px}header h1{font-size:15px;margin:0;flex:1}#hs{font-size:11px}
+  nav{order:3;flex:0 0 100%;flex-wrap:nowrap;overflow-x:auto;gap:2px;padding-bottom:2px;scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}nav button{white-space:nowrap;padding:7px 10px;font-size:14px}
+  main{padding:10px}.grid{grid-template-columns:repeat(2,1fr);gap:8px}.row{gap:10px}
+  .card{padding:10px}.card .v{font-size:18px}
+  th,td{padding:6px 5px;font-size:13px}img.th{width:48px;height:32px}
+  .tools{gap:6px}.tools>select,.tools>input:not([type=date]){flex:1 1 140px;min-width:0}
+  .tools input[type=date]{flex:1 1 130px;min-width:0}.tools .mut{font-size:12px}
+  .tools a,.tools button{flex:0 0 auto}button.b{padding:9px 12px}
+  .modal{padding:0}.modal .card{border-radius:0;min-height:100%}
+  form.set{grid-template-columns:1fr}.banner{font-size:13px;padding:10px 12px}
+}
+@media(max-width:380px){.grid{grid-template-columns:1fr 1fr}.card .v{font-size:16px}}
+</style></head><body>
+<header><h1>📊 SP Bot</h1>
+<nav id="nav"></nav><span id="hs" class="mut"></span><a href="/logout" class="mut">Logout</a></header>
+<main id="main">Loading…</main>
+<div class="modal" id="modal" onclick="if(event.target==this)this.classList.remove('on')"><div class="card" id="mbody"></div></div>
+<script>
+const $=s=>document.querySelector(s), api=(p,o)=>fetch('/api/'+p,o).then(r=>r.json());
+const post=(p,d)=>api(p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d||{})});
+const N=x=>x==null?'–':Number(x).toLocaleString(), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dt=t=>t?new Date(t*1000).toLocaleString([], {dateStyle:'medium',timeStyle:'short'}):'–';
+const dur=s=>s<3600?Math.floor(s/60)+' min':s<86400?Math.floor(s/3600)+'h '+Math.floor(s%3600/60)+'m':Math.floor(s/86400)+'d '+Math.floor(s%86400/3600)+'h';
+const pct=(a,b)=>b?`<span class="${a>=b?'up':'down'}">${a>=b?'▲':'▼'} ${Math.abs(Math.round((a-b)/b*100))}%</span>`:'';
+const card=(l,v,d)=>`<div class="card"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d||''}</div></div>`;
+const th=u=>u?`<img class="th" loading="lazy" referrerpolicy="no-referrer" src="${esc(u)}" onerror="this.style.visibility='hidden'">`:'<div class="th"></div>';
+
+/* ---------- tiny SVG charts ---------- */
+function bars(data,key,{color='var(--pri)',label=d=>d.day}={}){
+  const W=600,H=170,p=28,mx=Math.max(1,...data.map(d=>d[key])),bw=(W-p)/data.length;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">`;
+  for(let i=0;i<=3;i++){const y=H-20-(H-34)*i/3;s+=`<line x1="${p}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="0" y="${y+3}">${N(Math.round(mx*i/3))}</text>`}
+  data.forEach((d,i)=>{const h=(H-34)*d[key]/mx;s+=`<rect x="${p+i*bw+1}" y="${H-20-h}" width="${Math.max(1,bw-2)}" height="${h}" fill="${color}" rx="2"><title>${label(d)}: ${N(d[key])}</title></rect>`;
+    if(data.length<=31&&(i%Math.ceil(data.length/10)==0))s+=`<text x="${p+i*bw}" y="${H-6}">${String(label(d)).slice(-5)}</text>`});
+  return s+'</svg>'}
+function line(pts,{color='var(--pri)'}={}){ // pts:[[label,val]]
+  if(pts.length<2)return '<p class="mut">Not enough data yet – check back after a few scrapes.</p>';
+  const W=600,H=170,p=36,mx=Math.max(1,...pts.map(x=>x[1])),mn=Math.min(...pts.map(x=>x[1])),rg=Math.max(1,mx-mn);
+  const X=i=>p+(W-p-6)*i/(pts.length-1),Y=v=>H-20-(H-34)*(v-mn)/rg;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%">`;
+  for(let i=0;i<=3;i++){const y=H-20-(H-34)*i/3;s+=`<line x1="${p}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="0" y="${y+3}">${N(Math.round(mn+rg*i/3))}</text>`}
+  s+=`<polyline fill="none" stroke="${color}" stroke-width="2" points="${pts.map((x,i)=>X(i)+','+Y(x[1])).join(' ')}"/>`;
+  pts.forEach((x,i)=>s+=`<circle cx="${X(i)}" cy="${Y(x[1])}" r="3" fill="${color}"><title>${x[0]}: ${N(x[1])}</title></circle>`);
+  s+=`<text x="${p}" y="${H-6}">${pts[0][0]}</text><text x="${W-60}" y="${H-6}">${pts[pts.length-1][0]}</text>`;
+  return s+'</svg>'}
+
+const vtable=(rows,cols)=>`<div class="scroll"><table><tr>${cols.map(c=>`<th class="${c.n?'n':''}">${c.h}</th>`).join('')}</tr>${rows.map(r=>`<tr class="click" onclick="openVideo('${r.id}')">${cols.map(c=>`<td class="${c.n?'n':''}">${c.f(r)}</td>`).join('')}</tr>`).join('')||'<tr><td class="mut">No data</td></tr>'}</table></div>`;
+const vt=r=>`<div style="display:flex;gap:8px;align-items:center">${th(r.thumb)}<span>${esc(r.title)}</span></div>`;
+
+const pages={};let cur='overview';
+const TABS=[['overview','Overview'],['reports','Reports'],['videos','Videos'],['competitors','Competitors'],['insights','Tags & Performers'],['monitor','Upload Monitor'],['settings','Settings']];
+$('#nav').innerHTML=TABS.map(t=>`<button data-t="${t[0]}" onclick="go('${t[0]}')">${t[1]}</button>`).join('');
+function go(t){cur=t;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==t));location.hash=t;$('#main').innerHTML='Loading…';pages[t]()}
+async function status(){const s=await api('status');$('#hs').textContent=s.running?'⏳ scraping…':s.last_ok?'last sync '+dur(s.now-s.last_ok)+' ago':'';return s}
+
+/* ---------- Overview ---------- */
+pages.overview=async()=>{
+  const [o,s]=await Promise.all([api('overview'),status()]);const t=o.totals;
+  const idle=s.idle_sec, bad=s.stalled||(idle!=null&&idle>=s.limit_sec);
+  let h=`<div class="banner ${bad?'bad':'ok'}">${idle==null?'No videos tracked yet – click “Scrape now” in Upload Monitor.':bad?`⚠ No upload for ${dur(idle)} (limit ${dur(s.limit_sec)}). Last upload: ${dt(s.last_upload)}`:`✔ Uploading OK – last upload ${dur(idle)} ago (${dt(s.last_upload)})`}</div>`;
+  h+=`<div class="grid">${card('Total videos',N(t.videos))}${card('Total views',N(t.views))}${card('Total likes',N(t.likes))}${card('Total 🔥 reactions',N(t.orgasms))}${card('Playlist adds',N(t.playlists))}${card('Comments',N(t.comments))}${card('Avg views / video',N(t.avg_views))}${card('Engagement',t.engagement+'%','(likes+🔥)/views')}</div>`;
+  h+=`<div class="grid">${card('Uploads today',o.today.uploads,'yesterday '+o.yesterday.uploads+' '+pct(o.today.uploads,o.yesterday.uploads))}${card('Views gained today',N(o.today.views),'yesterday '+N(o.yesterday.views)+' '+pct(o.today.views,o.yesterday.views))}${card('Likes gained today',N(o.today.likes),'yesterday '+N(o.yesterday.likes))}${card('Uploads (24h)',o.uploads_24h)}${card('Views gained (24h)',N(o.views_24h))}</div>`;
+  h+=`<div class="row"><div class="card"><h2>Uploads per day (30 days)</h2>${bars(o.series,'uploads',{color:'var(--ok)'})}</div><div class="card"><h2>Views gained per day (30 days)</h2>${bars(o.series,'views')}</div></div>`;
+  h+=`<div class="row"><div class="card"><h2>🔥 Trending – views gained last 24h</h2>${vtable(o.trending,[{h:'Video',f:vt},{h:'+24h',n:1,f:r=>'+'+N(r.gain)},{h:'Total',n:1,f:r=>N(r.views)}])}</div><div class="card"><h2>🏆 Top videos – all time</h2>${vtable(o.top_videos,[{h:'Video',f:vt},{h:'Views',n:1,f:r=>N(r.views)},{h:'Likes',n:1,f:r=>N(r.likes)}])}</div></div>`;
+  $('#main').innerHTML=h};
+
+/* ---------- Reports ---------- */
+let rp={period:'7d',from:'',to:''};
+pages.reports=async()=>{
+  const qs=rp.from?`from=${rp.from}&to=${rp.to||rp.from}`:`period=${rp.period}`;
+  const [r,m]=await Promise.all([api('report?'+qs),api('monthly')]);const s=r.summary,p=r.previous;
+  const opts=[['today','Today'],['yesterday','Yesterday'],['7d','Last 7 days'],['30d','Last 30 days'],['90d','Last 90 days'],['week','This week'],['month','This month'],['lastmonth','Last month'],['year','This year'],['all','All time']];
+  let h=`<div class="tools"><select id="rpp" onchange="rp={period:this.value};pages.reports()">${opts.map(o=>`<option value="${o[0]}" ${!rp.from&&rp.period==o[0]?'selected':''}>${o[1]}</option>`).join('')}</select>
+  <span class="mut">or</span><input type="date" id="rf" value="${rp.from}"> → <input type="date" id="rt" value="${rp.to}"><button class="b g" onclick="rp={from:$('#rf').value,to:$('#rt').value};if(rp.from)pages.reports()">Apply</button>
+  <a href="/api/export/report.csv?${qs}"><button class="b g">⬇ CSV (daily)</button></a><span class="mut">${r.range[0]} → ${r.range[1]}</span></div>`;
+  const cmp=(a,b)=>`vs prev: ${N(b)} ${pct(a,b)}`;
+  h+=`<div class="grid">${card('Uploads',s.uploads,cmp(s.uploads,p.uploads))}${card('Views gained',N(s.views),cmp(s.views,p.views))}${card('Likes gained',N(s.likes),cmp(s.likes,p.likes))}${card('🔥 gained',N(s.orgasms))}${card('Comments gained',N(s.comments))}${card('Avg views / day',N(s.avg_views_per_day))}${card('Engagement',s.engagement+'%')}${card('Best day',r.best_day&&r.best_day.views?r.best_day.day.slice(5):'–',r.best_day?N(r.best_day.views)+' views':'')}${card('Days with uploads',r.active_days+' / '+s.days)}</div>`;
+  h+=`<div class="row"><div class="card"><h2>Uploads per day</h2>${bars(r.series,'uploads',{color:'var(--ok)'})}</div><div class="card"><h2>Views gained per day</h2>${bars(r.series,'views')}</div><div class="card"><h2>Likes gained per day</h2>${bars(r.series,'likes',{color:'var(--warn)'})}</div><div class="card"><h2>Uploads by hour of day</h2>${bars(r.upload_hours.map((v,i)=>({day:i+':00',v})),'v',{color:'var(--ok)'})}</div></div>`;
+  h+=`<div class="row"><div class="card"><h2>Top videos by views gained</h2>${vtable(r.top_videos,[{h:'Video',f:vt},{h:'+Views',n:1,f:x=>'+'+N(x.views_gain)},{h:'+Likes',n:1,f:x=>N(x.likes_gain)},{h:'Total',n:1,f:x=>N(x.total_views)}])}</div>
+  <div class="card"><h2>Best new uploads in period</h2>${vtable(r.top_new_uploads,[{h:'Video',f:vt},{h:'Views',n:1,f:x=>N(x.views_gain)}])}</div></div>`;
+  const nt=(rows)=>`<div class="scroll"><table><tr><th>Name</th><th class="n">+Views</th><th class="n">+Likes</th><th class="n">Uploads</th></tr>${rows.map(x=>`<tr><td>${esc(x.name)}</td><td class="n">${N(x.views)}</td><td class="n">${N(x.likes)}</td><td class="n">${x.uploads}</td></tr>`).join('')||'<tr><td class="mut">No data</td></tr>'}</table></div>`;
+  h+=`<div class="row"><div class="card"><h2>Top tags</h2>${nt(r.top_tags)}</div><div class="card"><h2>Top performers</h2>${nt(r.top_performers)}</div></div>`;
+  h+=`<div class="card"><h2>Monthly report</h2><div class="scroll"><table><tr><th>Month</th><th class="n">Uploads</th><th class="n">Views gained</th><th class="n">Likes</th><th class="n">Engagement</th></tr>${m.slice().reverse().map(x=>`<tr><td>${x.month}</td><td class="n">${x.uploads}</td><td class="n">${N(x.views)}</td><td class="n">${N(x.likes)}</td><td class="n">${x.engagement}%</td></tr>`).join('')}</table></div></div>`;
+  $('#main').innerHTML=h};
+
+/* ---------- Videos ---------- */
+let vq={q:'',sort:'views',tag:'',performer:''};
+pages.videos=async()=>{
+  const r=await api('videos?'+new URLSearchParams(vq));
+  const S=[['views','Most views'],['gain24','Trending 24h'],['vpd','Views / day'],['new','Newest'],['likes','Most likes'],['orgasms','Most 🔥'],['comments','Most comments'],['engagement','Engagement']];
+  $('#main').innerHTML=`<div class="tools"><input id="vqq" placeholder="Search title…" value="${esc(vq.q)}" onkeydown="if(event.key=='Enter'){vq.q=this.value;pages.videos()}">
+  <select onchange="vq.sort=this.value;pages.videos()">${S.map(o=>`<option value="${o[0]}" ${vq.sort==o[0]?'selected':''}>${o[1]}</option>`).join('')}</select>
+  ${vq.tag?`<span class="tag" onclick="vq.tag='';pages.videos()">tag: ${esc(vq.tag)} ✕</span>`:''}${vq.performer?`<span class="tag" onclick="vq.performer='';pages.videos()">performer: ${esc(vq.performer)} ✕</span>`:''}
+  <a href="/api/export/videos.csv"><button class="b g">⬇ CSV</button></a><span class="mut">${r.length} videos</span></div>
+  <div class="card">${vtable(r,[{h:'Video',f:vt},{h:'Uploaded',f:x=>dt(x.uploaded_at)},{h:'Views',n:1,f:x=>N(x.views)},{h:'+24h',n:1,f:x=>x.gain24?'+'+N(x.gain24):'–'},{h:'Views/day',n:1,f:x=>N(x.views_per_day)},{h:'Likes',n:1,f:x=>N(x.likes)},{h:'🔥',n:1,f:x=>N(x.orgasms)},{h:'Playlist',n:1,f:x=>N(x.playlists)},{h:'Comments',n:1,f:x=>N(x.comments)},{h:'Eng.',n:1,f:x=>x.engagement+'%'}])}</div>`};
+async function openVideo(id){
+  const d=await api('video/'+id),v=d.video;$('#modal').classList.add('on');
+  const cum=d.daily.map(x=>[x.day.slice(5),x.views]);
+  $('#mbody').innerHTML=`<div style="display:flex;justify-content:space-between;gap:8px"><h2 style="font-size:16px">${esc(v.title)}</h2><button class="b g" onclick="$('#modal').classList.remove('on')">✕</button></div>
+  <p class="mut">Uploaded ${dt(v.uploaded_at)} · <a href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">open on site ↗</a></p>
+  <div class="grid">${card('Views',N(v.views))}${card('Likes',N(v.likes))}${card('🔥',N(v.orgasms))}${card('Playlist',N(v.playlists))}${card('Comments',N(v.comments))}</div>
+  <h2>Views over time (daily)</h2>${line(cum)}<h2>Views gained per day</h2>${bars(d.daily.map(x=>({day:x.day,g:x.gain})),'g')}
+  <p>${d.performers.map(p=>`<span class="tag" onclick="vq={q:'',sort:'views',tag:'',performer:'${esc(p).replace(/'/g,"\\'")}'};$('#modal').classList.remove('on');go('videos')">👤 ${esc(p)}</span>`).join('')}${d.tags.map(t=>`<span class="tag" onclick="vq={q:'',sort:'views',tag:'${esc(t)}',performer:''};$('#modal').classList.remove('on');go('videos')">#${esc(t)}</span>`).join('')}</p>
+  <h2>Related videos (shared tags / performer)</h2>${vtable(d.related,[{h:'Video',f:x=>esc(x.title)},{h:'Views',n:1,f:x=>N(x.views)},{h:'Likes',n:1,f:x=>N(x.likes)}])}`}
+
+
+/* ---------- Competitors ---------- */
+let cs={key:'rank',dir:1},cdata=null,cq='';
+const hrs=h=>h==null?'–':h<1?Math.round(h*60)+'m':h<48?h.toFixed(h<10?1:0)+'h':Math.round(h/24)+'d';
+const av=r=>`<span class="av" style="color:${esc(r.fg)};background:${esc(r.bg)}">${esc((r.name||'?')[0].toUpperCase())}</span>`;
+const chg=v=>v==null||v==0?'':`<span class="chg ${v>0?'up':'down'}">${v>0?'▲':'▼'}${Math.abs(v)}</span>`;
+const sgn=v=>v==null?'<span class="mut">…</span>':(v>0?'+':'')+N(v);
+const COLS=[['rank','#',r=>r.me?'★':(r.rank??'–')+chg(r.rank_change)],['name','Blogger',r=>av(r)+esc(r.name)+(r.me?' <span class="mut">(you)</span>':'')+(r.extra?' <span class="mut">(extra)</span>':'')],
+ ['stars','Stars',r=>r.me?'':'★'.repeat(r.stars||0)],['posts','Posts',r=>r.me?N(r.videos_total):N(r.posts)],['likes','Total likes',r=>r.me?N(r.likes_total):N(r.likes)],['likes_per_post','Likes/post',r=>r.me?(r.videos_total?N(Math.round(r.likes_total/r.videos_total)):'–'):N(r.likes_per_post)],
+ ['uploads_24h','Uploads 24h',r=>`<b title="${r.capped?'at least – more than the crawled pages cover':r.src=='community'?'from community-page history':'counted from crawled videos'}">${r.uploads_24h}${r.capped?'+':''}</b>`],['per_day','Per day',r=>r.per_day],['posts_24h','Δposts 24h',r=>r.me?'':sgn(r.posts_24h)],['likes_24h','Δlikes 24h',r=>r.me?'':sgn(r.likes_24h)],
+ ['views_gain_24h','Views gained 24h*',r=>r.me?'':N(r.views_gain_24h)],['avg_views','Avg views',r=>N(r.avg_views)],['median_views','Median',r=>N(r.median_views)],['engagement','Eng.',r=>r.engagement+'%'],
+ ['idle_h','Last upload',r=>r.last_upload?hrs(r.idle_h)+' ago':'–'],['best_hour','Peak hour',r=>r.best_hour==null?'–':r.best_hour+':00']];
+function csort(k){cs.dir=cs.key==k?-cs.dir:(k=='rank'||k=='name'||k=='idle_h'?1:-1);cs.key=k;drawComp()}
+function drawComp(){
+  const d=cdata,q=cq.trim().toLowerCase().replace(/^@/,'');
+  const hit=r=>!q||(r.name+' '+r.handle+' '+(r.top_tags||[]).map(t=>t[0]).join(' ')+' '+(r.top_performers||[]).map(t=>t[0]).join(' ')).toLowerCase().includes(q);
+  const rows=d.rows.filter(hit);if(d.me&&(!q||hit(d.me)))rows.push(d.me);
+  const cnt=document.querySelector('#ccount');if(cnt)cnt.textContent=q?rows.filter(r=>!r.me).length+' of '+d.rows.length+' match':d.rows.length+' bloggers';
+  const v=r=>{const x=r[cs.key];return x==null?(cs.dir>0?1e12:-1):cs.key=='name'?String(x).toLowerCase():cs.key=='rank'&&r.me?1e9:x};
+  rows.sort((a,b)=>{a=v(a);b=v(b);return (a>b?1:a<b?-1:0)*cs.dir});
+  $('#ctab').innerHTML=`<tr>${COLS.map(c=>`<th class="s ${c[0]=='rank'||c[0]=='name'||c[0]=='stars'?'':'n'}" onclick="csort('${c[0]}')">${c[1]}${cs.key==c[0]?(cs.dir>0?' ▲':' ▼'):''}</th>`).join('')}</tr>`+
+   (rows.length?'':'<tr><td class="mut" colspan="16">No competitor matches your search.</td></tr>')+rows.map(r=>`<tr class="${r.me?'me':'click'}" ${r.me?'':`onclick="openComp('${encodeURIComponent(r.handle)}')"`}>${COLS.map(c=>`<td class="${c[0]=='rank'||c[0]=='name'||c[0]=='stars'?'':'n'}">${c[2](r)}</td>`).join('')}</tr>`).join('')}
+pages.competitors=async()=>{
+  const [d,i]=await Promise.all([api('competitors'),api('competitor-insights')]);cdata=d;const R=d.rows,me=d.me;
+  const sum=k=>R.reduce((a,r)=>a+(r[k]||0),0),top=(k)=>R.slice().sort((a,b)=>b[k]-a[k])[0];
+  const tu=top('uploads_24h'),tv=top('avg_views'),tg=top('views_gain_24h');
+  let h=`<div class="banner ${d.last_ok?'ok':'bad'}">${d.running?'⏳ Scraping competitors… '+esc(d.progress):d.last_ok?`✔ ${R.length} competitors tracked (top ${d.top_n} of the community page) · updated ${dur(d.now-d.last_ok)} ago`:'No competitor data yet – press “Scrape competitors now”.'}${d.error?` <span class="mut">· ${esc(d.error)}</span>`:''}</div>
+  <div class="tools"><button class="b" onclick="compScrape(this)">Scrape competitors now</button><a href="/api/export/competitors.csv"><button class="b g">⬇ CSV</button></a><span class="mut">Next auto refresh: ${d.next_run?new Date(d.next_run*1000).toLocaleTimeString():'–'} · tracks the community page ranking by itself</span></div>`;
+  if(R.length){
+   h+=`<div class="grid">${card('Competitor uploads (24h)',N(sum('uploads_24h')),'avg '+(sum('uploads_24h')/R.length).toFixed(1)+' each'+(me?' · you '+me.uploads_24h:''))}${card('Their views gained (24h)*',N(sum('views_gain_24h')),'lower bound – recent videos only')}${card('Most active (24h)',esc(tu.name),tu.uploads_24h+' uploads')}${card('Best avg views',esc(tv.name),N(tv.avg_views)+' / video')}${card('Fastest growing (24h)',esc(tg.name),'+'+N(tg.views_gain_24h)+' views')}${card('Your rank vs avg',me?(me.per_day+'/day'):'–',me?'competitor avg '+(sum('per_day')/R.length).toFixed(1)+'/day':'no videos tracked yet')}</div>`;
+   h+=`<div class="card"><h2>Leaderboard <span class="mut">– click a header to sort, a row for details. Your own row is highlighted.</span></h2><div class="tools"><input id="cqi" type="search" placeholder="Search name, handle, tag or performer…" value="${esc(cq)}" oninput="cq=this.value;drawComp()" style="flex:1 1 240px;max-width:420px"><span class="mut" id="ccount"></span></div><div class="scroll"><table id="ctab"></table></div>
+   <p class="mut">* Views gained = sum of view increases of that blogger’s recently crawled videos over the last 24h (needs ≥1 earlier crawl). The site shows no per-blogger traffic; Δposts/Δlikes come from community-page history and fill in as the tracker runs. Peak hour only uses videos first seen within 23h of upload.</p></div>`;
+   const by=(k,l,c)=>bars(R.slice().sort((a,b)=>b[k]-a[k]).slice(0,12).map(r=>({day:r.name.slice(0,7),v:r[k]})),'v',{color:c});
+   h+=`<div class="row"><div class="card"><h2>Uploads in the last 24h</h2>${by('uploads_24h','',"var(--ok)")}</div><div class="card"><h2>Average views per video</h2>${by('avg_views','','var(--pri)')}</div><div class="card"><h2>Views gained in 24h*</h2>${by('views_gain_24h','','var(--warn)')}</div><div class="card"><h2>Total likes</h2>${by('likes','','var(--bad)')}</div></div>`;
+   const mx=Math.max(1,...i.comp_hours,...i.my_hours),cell=(v,c)=>`<div title="${v}" style="background:color-mix(in srgb,${c} ${Math.round(8+85*v/mx)}%,transparent)">${v||''}</div>`;
+   h+=`<div class="row"><div class="card"><h2>When competitors upload (hour of day)</h2><div class="hm">${i.comp_hours.map(v=>cell(v,'var(--bad)')).join('')}</div><div class="hm" style="margin-top:2px">${i.comp_hours.map((_,k)=>`<div style="height:12px;line-height:12px">${k}</div>`).join('')}</div>
+   <h2 style="margin-top:12px">When you upload</h2><div class="hm">${i.my_hours.map(v=>cell(v,'var(--ok)')).join('')}</div><p class="mut">Hours where red is pale but you can still be fresh in the feed = lower competition. Based on ${N(i.videos_sampled)} sampled videos; grows daily.</p></div>
+   <div class="card"><h2>Activity feed</h2><div class="scroll"><table>${i.events.map(e=>`<tr><td class="mut">${dt(e.ts)}</td><td>${esc(e.message)}</td></tr>`).join('')||'<tr><td class="mut">Rank moves, new entrants and drop-outs will show up here.</td></tr>'}</table></div>
+   ${i.quiet.length?`<h2 style="margin-top:12px">😴 Gone quiet (&gt;24h)</h2>${i.quiet.map(q=>`<span class="tag">${esc(q.name)} · ${hrs(q.idle_h)}</span>`).join('')}`:''}</div></div>`;
+   h+=`<div class="row"><div class="card"><h2>🔥 Trending competitor videos <span class="mut">– views per hour, last 48h</span></h2><div class="scroll"><table><tr><th>Video</th><th>By</th><th class="n">Views/h</th><th class="n">Age</th></tr>${i.trending.map(t=>`<tr><td><div style="display:flex;gap:8px;align-items:center">${th(t.thumb)}<a href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">${esc(t.title)}</a></div></td><td>${esc(t.blogger)}</td><td class="n">${N(t.vph)}</td><td class="n">${hrs(t.age_h)}</td></tr>`).join('')||'<tr><td class="mut">No data</td></tr>'}</table></div></div>
+   <div class="card"><h2>💡 Tags competitors use that you don’t <span class="mut">– by avg views</span></h2><div class="scroll"><table><tr><th>Tag</th><th class="n">Videos</th><th class="n">Bloggers</th><th class="n">Avg views</th></tr>${i.missing_tags.map(t=>`<tr><td>#${esc(t.tag)}</td><td class="n">${t.comp_videos}</td><td class="n">${t.comp_bloggers}</td><td class="n">${N(t.comp_avg_views)}</td></tr>`).join('')||'<tr><td class="mut">No gaps found yet</td></tr>'}</table></div>
+   <h2 style="margin-top:12px">Shared tags – them vs you</h2><div class="scroll"><table><tr><th>Tag</th><th class="n">Their videos</th><th class="n">Their avg</th><th class="n">Your videos</th><th class="n">Your avg</th></tr>${i.shared_tags.map(t=>`<tr><td>#${esc(t.tag)}</td><td class="n">${t.comp_videos}</td><td class="n">${N(t.comp_avg_views)}</td><td class="n">${t.my_videos}</td><td class="n ${t.my_avg_views!=null&&t.my_avg_views>=t.comp_avg_views?'up':'down'}">${N(t.my_avg_views)}</td></tr>`).join('')}</table></div></div></div>`;
+  }
+  $('#main').innerHTML=h;if(R.length)drawComp()};
+async function compScrape(b){b.disabled=true;await post('comp-scrape');b.textContent='Started – refreshing…';const t=setInterval(async()=>{const d=await api('competitors');if(!d.running){clearInterval(t);if(cur=='competitors')pages.competitors()}else if(cur=='competitors'){const x=document.querySelector('.banner');if(x)x.textContent='⏳ Scraping competitors… '+d.progress}},4000)}
+async function openComp(h){
+  const d=await api('competitor/'+h),b=d.blogger,m=d.metrics||{};$('#modal').classList.add('on');
+  $('#mbody').innerHTML=`<div style="display:flex;justify-content:space-between;gap:8px"><h2 style="font-size:16px">${b.rank?'#'+b.rank+' ':''}${esc(b.name)} ${'★'.repeat(b.stars||0)}</h2><button class="b g" onclick="$('#modal').classList.remove('on')">✕</button></div>
+  <p class="mut"><a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">open blog on site ↗</a> · ${m.sample||0} recent videos sampled</p>
+  <div class="grid">${card('Posts',N(b.posts),N(b.vids)+' vids · '+N(b.lnks)+' links')}${card('Total likes',N(b.likes))}${card('Uploads 24h',m.uploads_24h??'–',(m.per_day||0)+' per day')}${card('Avg views',N(m.avg_views),'median '+N(m.median_views)+' · max '+N(m.max_views))}${card('Engagement',(m.engagement||0)+'%')}${card('Avg gap',m.avg_gap_min==null?'–':hrs(m.avg_gap_min/60),'longest '+hrs(m.longest_gap_h))}</div>
+  <h2>Likes over time (daily, community page)</h2>${line(d.history.map(x=>[x.day.slice(5),x.likes]))}
+  <div class="row"><div><h2>Likes gained / day</h2>${d.history.length>1?bars(d.history.map(x=>({day:x.day,v:x.likes_gain})),'v',{color:'var(--warn)'}):'<p class="mut">Needs 2+ days of history.</p>'}</div><div><h2>Uploads by hour</h2>${bars((m.hours||[]).map((v,i)=>({day:i+':00',v})),'v',{color:'var(--ok)'})}</div></div>
+  <p>${(m.top_tags||[]).map(t=>`<span class="tag">#${esc(t[0])} ${t[1]}</span>`).join('')}${(m.top_performers||[]).map(t=>`<span class="tag">👤 ${esc(t[0])} ${t[1]}</span>`).join('')}</p>
+  ${d.events.length?`<h2>Rank moves</h2>${d.events.map(e=>`<div class="mut">${dt(e.ts)} – ${esc(e.message)}</div>`).join('')}`:''}
+  <h2>Recent videos</h2><div class="scroll"><table><tr><th>Video</th><th>Uploaded</th><th class="n">Views</th><th class="n">+24h</th><th class="n">Views/h</th><th class="n">Likes</th></tr>${d.videos.map(v=>`<tr><td><div style="display:flex;gap:8px;align-items:center">${th(v.thumb)}<a href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">${esc(v.title)}</a></div></td><td>${v.exact?dt(v.uploaded_at):'~'+dt(v.uploaded_at).split(',').slice(0,2).join(',')}</td><td class="n">${N(v.views)}</td><td class="n">${v.gain24?'+'+N(v.gain24):'–'}</td><td class="n">${N(v.vph)}</td><td class="n">${N(v.likes)}</td></tr>`).join('')}</table></div>`}
+
+/* ---------- Insights ---------- */
+pages.insights=async()=>{
+  const i=await api('insights');
+  const tbl=(rows,kind)=>`<div class="scroll"><table><tr><th>Name</th><th class="n">Videos</th><th class="n">Views</th><th class="n">Avg views</th><th class="n">Likes</th><th class="n">Eng.</th></tr>${rows.slice(0,30).map(x=>`<tr class="click" onclick="vq={q:'',sort:'views',tag:'${kind=='tag'?esc(x.name).replace(/'/g,"\\'"):''}',performer:'${kind!='tag'?esc(x.name).replace(/'/g,"\\'"):''}'};go('videos')"><td>${esc(x.name)}</td><td class="n">${x.videos}</td><td class="n">${N(x.views)}</td><td class="n">${N(x.avg_views)}</td><td class="n">${N(x.likes)}</td><td class="n">${x.engagement}%</td></tr>`).join('')}</table></div>`;
+  $('#main').innerHTML=`<div class="row"><div class="card"><h2>Top performers</h2>${tbl(i.performers,'perf')}</div><div class="card"><h2>Top tags</h2>${tbl(i.tags,'tag')}</div></div>
+  <div class="row"><div class="card"><h2>Related tags (often used together)</h2><table><tr><th>Pair</th><th class="n">Videos</th><th class="n">Views</th></tr>${i.pairs.map(p=>`<tr><td>#${esc(p.a)} + #${esc(p.b)}</td><td class="n">${p.videos}</td><td class="n">${N(p.views)}</td></tr>`).join('')||'<tr><td class="mut">Not enough data</td></tr>'}</table></div>
+  <div class="card"><h2>Favourite tags per performer</h2><table>${i.performer_tags.map(p=>`<tr><td>${esc(p.performer)}</td><td>${p.tags.map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</td></tr>`).join('')}</table></div></div>
+  <div class="row"><div class="card"><h2>Avg views by upload hour ${i.best_hour?`<span class="mut">– best: ${i.best_hour.hour}:00 (${N(i.best_hour.avg_views)})</span>`:''}</h2>${bars(i.hours.map(h=>({day:h.hour+':00',v:h.avg_views})),'v',{color:'var(--warn)'})}</div>
+  <div class="card"><h2>Avg views by weekday</h2>${bars(i.weekdays.map(h=>({day:h.day,v:h.avg_views})),'v',{color:'var(--warn)'})}</div>
+  <div class="card"><h2>Uploads by weekday</h2>${bars(i.weekdays.map(h=>({day:h.day,v:h.uploads})),'v',{color:'var(--ok)'})}</div></div>`};
+
+/* ---------- Monitor ---------- */
+pages.monitor=async()=>{
+  const [s,a]=await Promise.all([status(),api('alerts')]);
+  const bad=s.stalled||(s.idle_sec!=null&&s.idle_sec>=s.limit_sec);
+  $('#main').innerHTML=`<div class="banner ${bad?'bad':'ok'}">${s.idle_sec==null?'No data yet':bad?'⚠ STALLED – no upload for '+dur(s.idle_sec):'✔ Healthy – last upload '+dur(s.idle_sec)+' ago'} · alert threshold ${dur(s.limit_sec)} · SMS provider: <b>${s.sms_provider}</b></div>
+  <div class="tools"><button class="b" onclick="act(this,'scrape',{full:true})">Scrape now (full)</button><button class="b g" onclick="act(this,'scrape',{full:false})">Quick check</button>
+  <button class="b g" onclick="act(this,'test-sms')">Send test SMS</button><button class="b g" onclick="act(this,'check',{force:true})">Force stall alert now</button>
+  <span class="mut">Next auto check: ${s.next_poll?new Date(s.next_poll*1000).toLocaleTimeString():'–'} · fail streak: ${s.fail_streak}</span></div><pre id="act" class="mut"></pre>
+  <div class="row"><div class="card"><h2>Alert / SMS log</h2><div class="scroll"><table><tr><th>Time</th><th>Type</th><th>Message</th><th>SMS</th></tr>${a.map(x=>`<tr title="${esc(x.detail)}"><td>${dt(x.ts)}</td><td>${x.kind}</td><td>${esc(x.message)}</td><td><span class="pill ${x.sms_ok?'ok':'bad'}">${x.sms_ok?'ok':'failed'}</span></td></tr>`).join('')||'<tr><td class="mut">No alerts yet</td></tr>'}</table></div></div>
+  <div class="card"><h2>Scrape log</h2><div class="scroll"><table><tr><th>Time</th><th>Type</th><th class="n">Pages</th><th class="n">Posts</th><th class="n">New</th><th>Status</th></tr>${s.scrapes.map(x=>`<tr><td>${dt(x.ts)}</td><td>${x.kind}</td><td class="n">${x.pages}</td><td class="n">${x.posts}</td><td class="n">${x.new_posts}</td><td><span class="pill ${x.ok?'ok':'bad'}" title="${esc(x.error)}">${x.ok?'ok':'error'}</span></td></tr>`).join('')}</table></div></div></div>`};
+async function act(b,p,d){b.disabled=true;const r=await post(p,d);$('#act').textContent=JSON.stringify(r,null,1);b.disabled=false;setTimeout(()=>cur=='monitor'&&pages.monitor(),1500)}
+
+/* ---------- Settings ---------- */
+const FIELDS=[
+['Profile',[['username','Username (blog @name)'],['site','Site URL']]],
+['Scraping',[['poll_minutes','Check newest videos every (min)','number'],['full_crawl_minutes','Full refresh of all views/likes every (min)','number'],['max_pages','Max pages to crawl (20 videos each)','number']]],
+['Competitors',[['comp_enabled','Track competitors automatically','bool'],['comp_top_n','Track top N community bloggers','number'],['comp_poll_minutes','Refresh every (min)','number'],['comp_min_pages','Min pages per blogger (20 videos each)','number'],['comp_max_pages','Max pages per blogger','number'],['comp_window_hours','Read back at least (hours)','number'],['comp_extra','Extra handles to track (comma separated)'],['comp_exclude','Handles to ignore (comma separated)']]],
+['Upload alert',[['alert_after_minutes','Alert if no upload for (min)','number'],['repeat_minutes','Repeat alert every (min, 0 = once)','number'],['notify_recovery','SMS when uploads resume','bool'],['alert_on_scrape_fail','SMS if site unreachable 3× in a row','bool'],['quiet_enabled','Enable quiet hours (no alerts)','bool'],['quiet_start','Quiet from (HH:MM)'],['quiet_end','Quiet until (HH:MM)'],['daily_summary','Send daily summary SMS','bool'],['daily_summary_hour','Summary hour (0-23)','number']]],
+['SMS gateway',[['sms_provider','Provider','sel',['console','smslenz','twilio','notifylk','http']],['smslenz_user_id','SMSlenz User ID'],['smslenz_api_key','SMSlenz API key','password'],['smslenz_sender_id','SMSlenz Sender ID (SMSlenzDEMO for testing)'],['twilio_sid','Twilio Account SID'],['twilio_token','Twilio Auth Token','password'],['twilio_from','Twilio From number'],['notifylk_user_id','Notify.lk User ID'],['notifylk_api_key','Notify.lk API key','password'],['notifylk_sender_id','Notify.lk Sender ID'],['http_method','Generic HTTP: method','sel',['GET','POST']],['http_url','Generic HTTP: URL ({to} {message})'],['http_body','Generic HTTP: body template (POST)'],['http_headers','Generic HTTP: headers JSON','password']]]];
+pages.settings=async()=>{
+  const c=await api('settings');
+  $('#main').innerHTML=`<div class="card"><form class="set" id="sf" onsubmit="saveSet(event)">${FIELDS.map(([g,fs])=>`<h3>${g}</h3>`+fs.map(([k,l,t,o])=>`<label>${l}`+(t=='bool'?`<select name="${k}"><option value="true" ${c[k]?'selected':''}>Yes</option><option value="false" ${!c[k]?'selected':''}>No</option></select>`:t=='sel'?`<select name="${k}">${o.map(x=>`<option ${c[k]==x?'selected':''}>${x}</option>`).join('')}</select>`:`<input name="${k}" type="${t||'text'}" value="${esc(c[k])}">`)+`</label>`).join('')).join('')}
+  <div style="grid-column:1/-1"><button class="b">Save settings</button> <button type="button" class="b g" onclick="act(this,'test-sms')">Send test SMS</button> <span id="sv" class="mut"></span><pre id="act" class="mut"></pre></div></form></div>
+  <p class="mut">Provider “console” only logs alerts (no SMS). Pick twilio / notifylk / http, fill the credentials, save, then press “Send test SMS”.</p>`};
+async function saveSet(e){e.preventDefault();await post('settings',Object.fromEntries(new FormData(e.target)));$('#sv').textContent='✔ saved'}
+
+addEventListener('hashchange',()=>{const t=location.hash.slice(1);if(pages[t]&&t!=cur)go(t)});
+go(pages[location.hash.slice(1)]?location.hash.slice(1):'overview');
+setInterval(()=>{if(cur=='overview'||cur=='monitor')pages[cur]();else status()},60000);
+</script></body></html>

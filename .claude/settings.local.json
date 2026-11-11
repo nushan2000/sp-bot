@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat)",
+      "Bash(python3 -)",
+      "Bash(sed -i 's/Dashboard binds to 127.0.0.1 only \\(no login\\).*/Login required \\(VBA_AUTH_USER \\\\/ VBA_AUTH_PASS\\). SMS recipients are hard-coded in sms.py. See deploy\\\\/ for VPS setup./' README.md)",
+      "Bash(mkdir -p deploy)",
+      "Bash(VBA_AUTH_USER=a VBA_AUTH_PASS=b VBA_PORT=8799 python3 app.py)"
+    ]
+  }
+}

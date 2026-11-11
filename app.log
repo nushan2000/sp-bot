@@ -1,0 +1,14 @@
+nohup: ignoring input
+Traceback (most recent call last):
+  File "/home/nushan/JaanNetwork/videoBot/VideoBotAnalytics/app.py", line 10, in <module>
+    server.serve(cfg)
+  File "/home/nushan/JaanNetwork/videoBot/VideoBotAnalytics/server.py", line 147, in serve
+    srv = ThreadingHTTPServer((cfg["host"], cfg["port"]), H)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/socketserver.py", line 457, in __init__
+    self.server_bind()
+  File "/usr/lib/python3.12/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+  File "/usr/lib/python3.12/socketserver.py", line 473, in server_bind
+    self.socket.bind(self.server_address)
+OSError: [Errno 98] Address already in use
